@@ -1,0 +1,382 @@
+mixin position(p)
+  tr
+    td #{p.type}
+    td
+      a(style='color: #666' href='#modal-close-outside'+p._id uk-toggle='') #{p.header}
+    td
+      span #{(Math.round(p.originalAmt * 10000) / 10000).toFixed(4)} ₴
+      br
+      span.uk-label #{(Math.round(p.quantity *p.buyPrice * 10000) / 10000).toFixed(4)} $
+    td
+      if p.currentAmt
+        span.toUSD #{(Math.round(p.currentAmt * 10000) / 10000).toFixed(4)} ₴
+      else if (p.currentAmt==0)
+        span.toUSD #{p.currentAmt} ₴
+      else
+        span
+        | --
+    td(style="width:80px;")
+      if p.currentAmt
+        if p.currentAmt>p.originalAmt
+          span.uk-label.uk-label-success
+            //- Rounding to 0.01
+            span.ion-arrow-up-c  #{(Math.round((p.currentAmt/p.originalAmt-1)*10000)/100).toFixed(2)}%
+
+        else if p.currentAmt<p.originalAmt
+          span.uk-label.uk-label-danger
+            span.ion-arrow-down-c  #{(Math.round((p.currentAmt/p.originalAmt-1)*10000)/100).toFixed(2)}%
+        else
+          span.uk-label.uk-label-warning 0.00%
+      else if (p.currentAmt==0)
+        span.uk-label.uk-label-danger
+            span.ion-arrow-down-c  -100 %
+      else
+        span --
+    td(style="width:80px;")
+      p
+        a(style='color: #666' href='#changeModal'+p._id uk-toggle='')
+          span(class=" ch_i hide" uk-icon="icon: pencil; ratio: 1.3" style="margin:3px;")
+        a(style='color: #666' href='#deleteModal'+p._id uk-toggle='')
+          span(class=" d_i hide" uk-icon="icon: trash; ratio: 1.2" style="margin:3px;")
+
+    //- Delete pop up
+    div(uk-modal='' id="deleteModal"+p._id )
+      center.uk-modal-dialog.uk-modal-body
+        h3.uk-modal-title Do you really want to remove the position below?
+        p #{p.type} - #{p.header}
+        p
+          button.uk-button.uk-button-default.uk-modal-close(type='button' style="margin-right:20px;") Cancel
+          button.uk-button.uk-button-primary(type='button' onclick=`deletePosition('${p._id}')`) Remove
+
+    //- Description
+    div(uk-modal='' id="modal-close-outside"+p._id)
+      .uk-modal-dialog.uk-modal-body
+        h2.uk-modal-title #{p.header}
+        p Quantity: #{p.quantity}
+        if p.usdCourse
+          p Buy price: #{p.buyPrice.toFixed(4)}$
+          p USD/UAH: #{p.usdCourse.toFixed(4)}
+        p #{p.description}
+        p
+          b Buy Date: #{months[p.createdAt.getMonth()]} #{p.createdAt.getDate()}, #{p.createdAt.getFullYear()}
+
+    //- Change pop up
+    .uk-flex-top(uk-modal='' id="changeModal"+p._id)
+      .uk-modal-dialog.uk-modal-body.uk-margin-auto-vertical
+        button.uk-modal-close-default(type='button' uk-close='')
+        |
+        form(action='' id="change"+p._id)
+          h1.uk-text-lead.uk-text-primary(style="margin-top:5px;") Update position
+          |
+          p
+            | Please select the Asset Type and provide the required information of the position. Data format is specified in the brackets.
+          |
+          ul.uk-subnav.uk-subnav-pill(uk-switcher='' id ="type"+p._id)
+            each t in types
+              li(class={"uk-active":p.type===t} aria-expanded={"true":p.type===t})
+                a(href='#') #{t}
+
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: file-text')
+              |
+              input.uk-input(type='text' placeholder='Header (exp: Apple Inc.)' id="header"+p._id value=p.header)
+          |
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: more')
+              |
+              input.uk-input(type='text' placeholder='Quantity (exp:2)' id="quantity"+p._id value=p.quantity)
+          |
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: credit-card')
+              |
+              input.uk-input(type='text' placeholder='Buy price $ (exp:1234.2123)' id="buyPrice"+p._id value=p.buyPrice)
+          |
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: history')
+              |
+              input.uk-input(type='text' placeholder='USD/UAH (exp:27.0004)' id="usdCourse"+p._id value=p.usdCourse)
+          |
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: database')
+              |
+              input.uk-input(type='text' placeholder='Current amt. in UAH (exp:2712312.0004)' id="currentAmt"+p._id value=p.currentAmt)
+          |
+          .uk-margin
+            .uk-inline(style='width: 100%')
+              span.uk-form-icon(uk-icon='icon: calendar')
+              |
+              input.uk-input(type='' placeholder='Purchase date (exp: 18.03.2021)' id="createdAt"+p._id value=`${p.createdAt.getDate()}.${p.createdAt.getMonth()+1}.${p.createdAt.getFullYear()}`)
+          |
+          p.uk-button.uk-button-secondary(style='width: 100%' onclick=`updatePosition("${p._id}")`)
+            | Send
+
+
+doctype html
+html
+  head
+    title
+      | Home
+    meta(charset='UTF-8')
+    meta(name='description' content='Clean and responsive administration panel')
+    link(rel='apple-touch-icon' sizes='57x57' href='ico/apple-icon-57x57.png')
+    link(rel='apple-touch-icon' sizes='60x60' href='ico/apple-icon-60x60.png')
+    link(rel='apple-touch-icon' sizes='72x72' href='ico/apple-icon-72x72.png')
+    link(rel='apple-touch-icon' sizes='76x76' href='ico/apple-icon-76x76.png')
+    link(rel='apple-touch-icon' sizes='114x114' href='ico/apple-icon-114x114.png')
+    link(rel='apple-touch-icon' sizes='120x120' href='ico/apple-icon-120x120.png')
+    link(rel='apple-touch-icon' sizes='144x144' href='ico/apple-icon-144x144.png')
+    link(rel='apple-touch-icon' sizes='152x152' href='ico/apple-icon-152x152.png')
+    link(rel='apple-touch-icon' sizes='180x180' href='ico/apple-icon-180x180.png')
+    link(rel='icon' type='image/png' sizes='192x192' href='ico/android-icon-192x192.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='ico/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='96x96' href='ico/favicon-96x96.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='ico/favicon-16x16.png')
+    link(rel='manifest' href='ico/manifest.json')
+    meta(name='msapplication-TileColor' content='#ffffff')
+    meta(name='msapplication-TileImage' content='/ms-icon-144x144.png')
+    meta(name='theme-color' content='#ffffff')
+    meta(name='keywords' content='Admin,Panel,HTML,CSS,XML,JavaScript')
+    meta(name='author' content='Erik Campobadal')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    // UIkit CSS
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/uikit@3.6.22/dist/css/uikit.min.css')
+    // UIkit JS
+    script(src='https://cdn.jsdelivr.net/npm/uikit@3.6.22/dist/js/uikit.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/uikit@3.6.22/dist/js/uikit-icons.min.js')
+    link(rel='stylesheet' href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')
+    link(rel='stylesheet' href='css/style.css')
+    script(src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0")
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/validator/13.6.0/validator.min.js' integrity='sha512-xYHcfaQeUiKHs9YsHqjpyLaHnh+q7y8kYuOGdh5FkJeK7Z+dZct7Yoa7h+PtsrKRh03t8eJZuSeCN7b0dkrFwA==' crossorigin='anonymous' referrerpolicy='no-referrer')
+    script(src='js/uikit.min.js')
+    script(src='js/uikit-icons.min.js')
+  body
+    .uk-navbar-container.tm-navbar-container.uk-active(uk-sticky='')
+      .uk-container.uk-container-expand
+        nav(uk-navbar='')
+          .uk-navbar-left
+            a.uk-navbar-item.uk-logo(href='#')
+              | Investment Portfolio
+          .uk-navbar-right
+            .uk-inline
+              a.uk-navbar-item.uk-logo(type='button' aria-expanded='false') #{user.name} <span class="uk-margin-small-right" uk-icon="chevron-down"></span>
+              .uk-dropdown(uk-dropdown='mode: hover; delay-hide: 100; pos: bottom-justify' )
+                ul.uk-nav.uk-dropdown-nav
+                  li.uk-active
+                    a.uk-logo(href='./sign' onclick="logout()" ) <span class="uk-margin-small-right" uk-icon="sign-out"></span> Log out
+
+    .content-background
+      center.uk-section-small.uk-section-default.header
+        .uk-container.uk-container-large
+          //- TODO ADD USER PORTFOLIO NAME
+          h1(id="portfName" contenteditable="true") #{user.portfolioName}
+          p(id="welcome") Welcome back!
+      .uk-section-small
+        .uk-container.uk-container-large
+          div(uk-grid='' class='uk-child-width-1-1@s uk-child-width-1-1@l')
+            div
+              .uk-card.uk-card-default
+                center.uk-card-header
+                  p Positions  #{`    `}
+                    a(href="#welcome" style="color:grey; margin-left:70px;" title="Edit" id="changeMode" onclick="changePortfolioMode()" )
+                      svg#Layer_1(version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='30.707px' height='30.707px' viewBox='0 0 364.707 364.707' enable-background='new 0 0 364.707 364.707' xml:space='preserve')
+                        path(fill='#F37B21' d='M223.864,272.729l-38.608-97.848l-56.603,89.184H93.166l79.052-127.654l-8.875-25.229h-30.781V81.12h52.691\
+                        l60.521,153.899l26.608-8.668l8.867,29.813L223.864,272.729z')
+                        path(fill='none' stroke='#F37B21' stroke-width='34' d='M337.623,182.198c0,85.579-69.363,154.934-154.934,154.934\
+                        c-85.571,0-154.936-69.354-154.936-154.934c0-85.569,69.363-154.933,154.936-154.933C268.259,27.265,337.623,96.629,337.623,182.198\
+                        z')
+
+                .uk-card-body
+                  center
+                    button(style="margin-top:-20px; display:none;" class="uk-button uk-button-default uk-button-large" href='#createPos' uk-toggle='' id="orderButton") Add position
+                    .uk-flex-top(uk-modal='' id='createPos')
+                      .uk-modal-dialog.uk-modal-body.uk-margin-auto-vertical
+                        button.uk-modal-close-default(type='button' uk-close='')
+                        |
+                        form(action='\
+                        ' id = "createForm")
+                          h1.uk-text-lead.uk-text-primary
+                            | Create new position
+                          |
+                          p
+                            | Please select the Asset Type and provide the required information of the position.
+                            | Data format is specified in the brackets.
+                          |
+                          ul.uk-subnav.uk-subnav-pill(uk-switcher='' id="createTypes")
+                            each t in types
+                              li(class="")
+                                a(href='#') #{t}
+                              |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: file-text')
+                              |
+                              input.uk-input.required.text(type='text' placeholder='Header (ex. Apple Inc.)' id="createHeader")
+                          |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: more')
+                              |
+                              input.uk-input.required.number(type='text' placeholder='Quantity (ex. 2)' id="createQuantity")
+                          |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: credit-card')
+                              |
+                              input.uk-input.required.number(type='text' placeholder='Buy price $ (ex. 1234.2123)' id="createBuyPrice")
+                          |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: database')
+                              |
+                              input.uk-input.number(type='text' placeholder='Current amt. in UAH (ex. 2712312.0004)' id="createCurrentAmt")
+                          |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: history')
+                              |
+                              input.uk-input.required.number(type='text' placeholder='USD/UAH (ex. 27.0004)' id="createUsdCourse")
+                          |
+                          .uk-margin
+                            .uk-inline(style='width: 100%')
+                              span.uk-form-icon(uk-icon='icon: calendar')
+                              |
+                              input.uk-input.required.date(type='' placeholder='Purchase date (ex. 18.03.2021)' id="createCreatedAt")
+                          |
+                          p.uk-button.uk-button-default(style='width: 100%' onclick='create()')
+                            | Send
+                  table.uk-table.uk-table-striped.uk-table-responsive.uk-table-hover
+                    thead
+                      tr
+                        th Asset type
+                        th Description
+                        th Original Amt.
+                        th Current Amt.
+                        th Change
+                    tbody
+                      each pos in user.positions
+                        +position(pos)
+                      //- TODO ADD TOTAL FORM
+                      tr#total()
+                        td
+                        td
+                        td
+                          span
+                            b #{sumBuy}
+                            |  ₴
+                            br
+                            span.uk-label #{sumBuyDollars.toFixed(4)} $
+
+                        td
+                          if ((typeof sumCurrent)=="number")
+                            span.toUSD
+                              b #{sumCurrent.toFixed(4)}
+                              |  ₴
+                          else
+                            span #{sumCurrent}
+                        td
+                          if ((typeof change)=="number")
+                            if change>0
+                              span.uk-label.uk-label-success
+                                span.ion-arrow-up-c  #{change.toFixed(2)}%
+                            else if change<0
+                              span.uk-label.uk-label-danger
+                                span.ion-arrow-down-c  #{change.toFixed(2)}%
+                            else
+                              span.uk-label.uk-label-warning 0.00%
+                          else
+                            span #{change}
+                        td
+
+        .uk-section-small
+          .uk-container.uk-container-large
+            div(uk-grid='' class='uk-child-width-1-1@s')
+              center
+                .uk-card.uk-card-default
+                  .uk-card-header Chart
+                  .uk-card-body
+                    div(style='height: 100%; width: 100%')
+                      canvas#myChart
+                    br
+                    br
+                    br
+                    div(style='height: 100%; width: 100%')
+                      canvas#positionChart
+      // Load More Javascript
+
+    .footer
+      p(style="margin-bottom: 9px; margin-top: 5px;")
+        a(href="https://finance.yahoo.com/quote/usduah=x/")
+          span#usd(style="margin:8%;") USD/UAH
+        a(href="https://www.google.com/finance/quote/.INX:INDEXSP")
+          span#nasdaq(style="margin:8%;")  S&P 500
+        a(href="https://www.google.com/finance/quote/.IXIC:INDEXNASDAQ")
+          span#nasdaq(style="margin:8%;")  NASDAQ
+        a(href="https://www.google.com/finance/quote/.DJI:INDEXDJX")
+          span#nasdaq(style="margin:8%;")  Dow Jones
+
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js')
+    script(src='./js/login.js')
+
+    //- Chart logic
+    script.
+      const stats = {};
+      const posStats ={};
+      const statsFiltered={};
+      let types = ['Stock', 'Equity', 'Bond', 'Metals', 'Futures', 'ETFs'];
+      try{
+        types.forEach( (e) =>{ stats[e] = 0; });
+           for (let position of !{JSON.stringify(user.positions)}) {
+              posStats[position.header]=position.originalAmt;
+              stats[position.type]+=position.originalAmt
+            }
+      } catch(e){
+        console.log(e)
+      }
+
+      types=[];
+      //Filtering stats for types chart
+      for (type in stats){
+        if(stats[type]){types.push(type); statsFiltered[type]=stats[type]}
+      }
+
+      //Percenteges rating for types chart
+      let sumAll=[0]
+      const reducer = (accumulator, currentValue) => accumulator + currentValue;
+      try{
+        sumAll = Object.values(statsFiltered).reduce(reducer);
+      } catch(e){
+        console.log(e)
+      }
+
+      //Replace int for percantage
+      for(i in statsFiltered){
+        statsFiltered[i]=(Math.round((statsFiltered[i]/sumAll)*10000)/100)
+      }
+      function randomRgba() {
+        const o = Math.round;
+        const r = Math.random;
+        const s = 255;
+        return `rgba(${o(r() * s)},${o(r() * s)},${o(
+          r() * s
+        )},${r().toFixed(1)})`;
+        }
+
+      const posColors=[];
+      for(i in posStats){
+        posColors.push(randomRgba());
+        posStats[i]=(Math.round((posStats[i]/sumAll)*10000)/100);
+      }
+
+      const positionChart = Object.values(posStats);
+      const userId = !{JSON.stringify(user._id)}
+      const dataChart = Object.values(statsFiltered);
+
+    script(src='js/script.js')
+    script(src='js/validation.js')
+    script(src='js/serverRequests.js')

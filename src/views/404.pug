@@ -1,0 +1,54 @@
+doctype html
+html
+  head
+    title
+      | Error
+    meta(charset='UTF-8')
+    meta(name='description' content='Clean and responsive administration panel')
+    link(rel='apple-touch-icon' sizes='57x57' href='ico/apple-icon-57x57.png')
+    link(rel='apple-touch-icon' sizes='60x60' href='ico/apple-icon-60x60.png')
+    link(rel='apple-touch-icon' sizes='72x72' href='ico/apple-icon-72x72.png')
+    link(rel='apple-touch-icon' sizes='76x76' href='ico/apple-icon-76x76.png')
+    link(rel='apple-touch-icon' sizes='114x114' href='ico/apple-icon-114x114.png')
+    link(rel='apple-touch-icon' sizes='120x120' href='ico/apple-icon-120x120.png')
+    link(rel='apple-touch-icon' sizes='144x144' href='ico/apple-icon-144x144.png')
+    link(rel='apple-touch-icon' sizes='152x152' href='ico/apple-icon-152x152.png')
+    link(rel='apple-touch-icon' sizes='180x180' href='ico/apple-icon-180x180.png')
+    link(rel='icon' type='image/png' sizes='192x192' href='ico/android-icon-192x192.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='ico/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='96x96' href='ico/favicon-96x96.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='ico/favicon-16x16.png')
+    link(rel='manifest' href='ico/manifest.json')
+    meta(name='msapplication-TileColor' content='#ffffff')
+    meta(name='msapplication-TileImage' content='/ms-icon-144x144.png')
+    meta(name='theme-color' content='#ffffff')
+    meta(name='keywords' content='Admin,Panel,HTML,CSS,XML,JavaScript')
+    meta(name='author' content='Erik Campobadal')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet' href='css/uikit.min.css')
+    link(rel='stylesheet' href='https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')
+    link(rel='stylesheet' href='css/style.css')
+    link(rel='stylesheet' href='css/notyf.min.css')
+    script(src='js/uikit.min.js')
+    script(src='js/uikit-icons.min.js')
+  body
+    .uk-navbar-container.tm-navbar-container.uk-sticky.uk-active(uk-sticky='media: 960' style='position: fixed; top: 0px; width: 1903px')
+      .uk-container.uk-container-expand
+        nav(uk-navbar='')
+          .uk-navbar-left
+            a.uk-navbar-item.uk-logo(href='./')
+              | Investment Portfolio
+    .content-background
+      .uk-section-large
+        .uk-container.uk-container-large
+          .uk-grid-collapse.uk-grid-match(uk-grid='' class='uk-child-width-1-1@s uk-child-width-1-4@l')
+            div
+            div
+              .uk-card.uk-card-default.uk-card-body
+                h1.uk-heading-primary.uk-text-middle #{status}
+            div
+              .uk-card.uk-card-primary.uk-card-body
+                h3.uk-card-title What is this page
+                p #{message}
+            div
+    script(src='js/script.js')
